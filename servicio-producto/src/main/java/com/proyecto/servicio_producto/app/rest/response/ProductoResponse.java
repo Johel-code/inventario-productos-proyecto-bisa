@@ -5,6 +5,7 @@ public record ProductoResponse(
         String codigoProducto,
         String nombre,
         Integer minStock,
-        Double porcentajeGanancia
+        Double porcentajeGanancia,
+        Long categoriaId
 ) {
 }
