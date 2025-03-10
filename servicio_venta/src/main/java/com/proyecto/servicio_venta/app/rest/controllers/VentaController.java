@@ -1,0 +1,21 @@
+package com.proyecto.servicio_venta.app.rest.controllers;
+
+import com.proyecto.servicio_venta.app.rest.request.VentaRequest;
+import com.proyecto.servicio_venta.app.rest.response.VentaResponse;
+import com.proyecto.servicio_venta.domain.services.VentaService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@AllArgsConstructor
+@RequestMapping(path = "venta")
+@RestController
+public class VentaController {
+
+    private final VentaService ventaService;
+
+    @PostMapping
+    public ResponseEntity<VentaResponse> realizarVenta(@RequestBody VentaRequest ventaRequest) {
+        return ResponseEntity.ok(ventaService.registrarVenta(ventaRequest));
+    }
+}

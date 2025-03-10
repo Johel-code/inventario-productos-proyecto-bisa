@@ -1,18 +1,13 @@
 package com.proyecto.servicio_producto.domain.models;
 
 import com.proyecto.servicio_producto.app.rest.response.ProductoResponse;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @Entity
 @Data
@@ -27,20 +22,25 @@ public class Producto {
 
   private String codigoProducto;
   private String nombre;
+  private BigDecimal costoCompra;
+  private BigDecimal precioVenta;
+  private Integer cantidadStock;
   private Integer minStock;
-  private Double porcentajeGanancia;
+  //private Double porcentajeGanancia;
 
   @ManyToOne
   @JoinColumn(name = "categoria_id")
   private Categoria categoria;
 
-  public static ProductoResponse toProductoResponse(Producto producto) {
+  public static ProductoResponse aResponse(Producto producto) {
     return new ProductoResponse(
         producto.id,
         producto.codigoProducto,
         producto.nombre,
+        producto.costoCompra,
+        producto.precioVenta,
+        producto.cantidadStock,
         producto.minStock,
-        producto.porcentajeGanancia,
         producto.getCategoria().getId()
     );
   }
