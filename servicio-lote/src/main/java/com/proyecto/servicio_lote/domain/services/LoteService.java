@@ -7,6 +7,7 @@ import com.proyecto.servicio_lote.clients.ProductoFeignClient;
 import com.proyecto.servicio_lote.common.enums.TipoMovimiento;
 import com.proyecto.servicio_lote.domain.models.Kardex;
 import com.proyecto.servicio_lote.domain.models.Lote;
+import com.proyecto.servicio_lote.domain.models.Producto;
 import com.proyecto.servicio_lote.domain.models.Proveedor;
 import com.proyecto.servicio_lote.domain.repositories.KardexRepository;
 import com.proyecto.servicio_lote.domain.repositories.LoteRepository;
@@ -35,8 +36,6 @@ public class LoteService {
         var proveedor = proveedorRepository.findById(request.proveedorId()).orElseThrow(() -> new RuntimeException("No existe el proveedor"));
         var producto = productoRepository.findById(request.productoId()).orElseThrow(() -> new RuntimeException("No existe el producto"));
 
-        ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() + request.cantidad());
-        productoFeignClient.actualizarStock(producto.getId(), requestCantidad);
 
         Lote lote = loteRepository.save(Lote.builder()
                 .producto(producto)
@@ -46,6 +45,18 @@ public class LoteService {
                 .fechaExpiracion(request.fechaExpiracion())
                 .build());
 
+        actualizarStock(request, producto);
+        actualizarKardex(request, producto, lote, proveedor);
+
+        return Lote.aResponse(lote);
+    }
+
+    private void actualizarStock(LoteRequest request, Producto producto) {
+        ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() + request.cantidad());
+        productoFeignClient.actualizarStock(producto.getId(), requestCantidad);
+    }
+
+    private void actualizarKardex(LoteRequest request, Producto producto, Lote lote, Proveedor proveedor) {
         kardexRepository.save(Kardex.builder()
                 .productoId(producto.getId())
                 .tipoMovimiento(TipoMovimiento.COMPRA)
@@ -55,7 +66,5 @@ public class LoteService {
                 .loteId(lote.getId())
                 .proveedorId(proveedor.getId())
                 .build());
-        
-        return Lote.aResponse(lote);
     }
 }
