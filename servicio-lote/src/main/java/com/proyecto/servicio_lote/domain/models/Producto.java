@@ -1,15 +1,13 @@
 package com.proyecto.servicio_lote.domain.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -28,4 +26,7 @@ public class Producto {
     private BigDecimal precioVenta;
     private Integer cantidadStock;
     private Integer minStock;
+
+    @OneToMany(mappedBy = "producto")
+    private List<Lote> lotes;
 }
