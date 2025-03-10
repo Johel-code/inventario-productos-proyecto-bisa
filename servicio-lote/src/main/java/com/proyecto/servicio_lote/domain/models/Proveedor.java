@@ -1,5 +1,6 @@
 package com.proyecto.servicio_lote.domain.models;
 
+import com.proyecto.servicio_lote.app.rest.response.ProveedorResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,4 +23,12 @@ public class Proveedor {
     private String direccion;
     @OneToMany(mappedBy = "proveedor")
     private List<Lote> lotes;
+
+    public static ProveedorResponse aResponse(Proveedor proveedor) {
+        return new ProveedorResponse(
+                proveedor.id,
+                proveedor.nombre,
+                proveedor.direccion
+        );
+    }
 }

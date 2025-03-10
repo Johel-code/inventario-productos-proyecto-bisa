@@ -1,6 +1,6 @@
-package com.proyecto.servicio_venta.domain.models;
+package com.proyecto.servicio_lote.domain.models;
 
-import com.proyecto.servicio_venta.common.enums.TipoMovimiento;
+import com.proyecto.servicio_lote.common.enums.TipoMovimiento;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,9 +15,9 @@ import java.time.LocalDate;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Kardex {
 
     @Id
