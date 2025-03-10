@@ -1,5 +1,6 @@
 package com.proyecto.servicio_lote.domain.services;
 
+import com.proyecto.servicio_lote.app.rest.request.LoteCantidadRequest;
 import com.proyecto.servicio_lote.app.rest.request.LoteRequest;
 import com.proyecto.servicio_lote.app.rest.request.ProductoCantidadRequest;
 import com.proyecto.servicio_lote.app.rest.response.LoteResponse;
@@ -15,8 +16,6 @@ import com.proyecto.servicio_lote.domain.repositories.ProductoRepository;
 import com.proyecto.servicio_lote.domain.repositories.ProveedorRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -46,7 +45,7 @@ public class LoteService {
                 .fechaExpiracion(request.fechaExpiracion())
                 .build());
 
-        actualizarStock(request, producto);
+        actualizarStockProducto(request, producto);
         actualizarKardex(request, producto, lote, proveedor);
 
         return Lote.aResponse(lote);
@@ -60,7 +59,13 @@ public class LoteService {
                 .toList();
     }
 
-    private void actualizarStock(LoteRequest request, Producto producto) {
+    public void actualizarStockLote(Long id, LoteCantidadRequest request){
+        var lote = loteRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe el lote"));
+        lote.setCantidad(request.cantidad());
+        loteRepository.save(lote);
+    }
+
+    private void actualizarStockProducto(LoteRequest request, Producto producto) {
         ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() + request.cantidad());
         productoFeignClient.actualizarStock(producto.getId(), requestCantidad);
     }

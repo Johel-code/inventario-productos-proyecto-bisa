@@ -1,5 +1,6 @@
 package com.proyecto.servicio_lote.app.rest.controllers;
 
+import com.proyecto.servicio_lote.app.rest.request.LoteCantidadRequest;
 import com.proyecto.servicio_lote.app.rest.request.LoteRequest;
 import com.proyecto.servicio_lote.app.rest.response.LoteResponse;
 import com.proyecto.servicio_lote.domain.services.LoteService;
@@ -25,5 +26,11 @@ public class LoteController {
     @GetMapping(path = "producto/{id}")
     public ResponseEntity<List<LoteResponse>> obtenerLotesPorIdProducto(@PathVariable Long id) {
         return ResponseEntity.ok(loteService.obtenerLotesPorIdProducto(id));
+    }
+
+    @PutMapping(path = "actualizar-stock/{id}")
+    public ResponseEntity<Void> actualizarStock(@PathVariable Long id, @RequestBody LoteCantidadRequest request) {
+        loteService.actualizarStockLote(id, request);
+        return ResponseEntity.ok().build();
     }
 }
