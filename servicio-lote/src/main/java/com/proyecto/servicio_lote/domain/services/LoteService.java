@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -49,6 +50,14 @@ public class LoteService {
         actualizarKardex(request, producto, lote, proveedor);
 
         return Lote.aResponse(lote);
+    }
+
+    public List<LoteResponse> obtenerLotesPorIdProducto(Long productoId){
+        var producto = productoRepository.findById(productoId).orElseThrow(() -> new RuntimeException("No existe el producto"));
+        var lotes = loteRepository.findByProducto(producto);
+        return lotes.stream()
+                .map(Lote::aResponse)
+                .toList();
     }
 
     private void actualizarStock(LoteRequest request, Producto producto) {
