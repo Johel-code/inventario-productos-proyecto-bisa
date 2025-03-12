@@ -1,6 +1,7 @@
 package com.proyecto.servicio_reporte.domain.models;
 
 import com.proyecto.servicio_reporte.app.rest.response.ProductoMasVendidoResponse;
+import com.proyecto.servicio_reporte.app.rest.response.ProductoUmbralResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,4 +32,16 @@ public class Producto {
     @OneToMany(mappedBy = "producto")
     private List<DetalleVenta> detalleVentas;
 
+    public static ProductoUmbralResponse aResponse(Producto producto) {
+        return new ProductoUmbralResponse(
+                producto.id,
+                producto.codigoProducto,
+                producto.nombre,
+                producto.costoCompra,
+                producto.precioVenta,
+                producto.cantidadStock,
+                producto.minStock,
+                producto.categoriaId
+        );
+    }
 }
