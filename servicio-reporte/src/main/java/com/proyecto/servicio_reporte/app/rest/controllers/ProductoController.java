@@ -1,6 +1,7 @@
 package com.proyecto.servicio_reporte.app.rest.controllers;
 
 import com.proyecto.servicio_reporte.app.rest.response.ProductoMasVendidoResponse;
+import com.proyecto.servicio_reporte.app.rest.response.ProductoUmbralResponse;
 import com.proyecto.servicio_reporte.domain.services.ProductoService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,5 +27,10 @@ public class ProductoController {
     @GetMapping(path = "menos-vendidos")
     public ResponseEntity<List<ProductoMasVendidoResponse>> obtenerNProductosMenosVendidos(@RequestParam Integer cantidad) {
         return ResponseEntity.ok(productoService.obtenerProductosOrdanadosPorCantidadVendida(cantidad, "asc"));
+    }
+
+    @GetMapping(path = "debajo-umbral")
+    public ResponseEntity<List<ProductoUmbralResponse>> obtenerProductoDebajoUmbral(@RequestParam(required = false) Integer umbral) {
+        return ResponseEntity.ok(productoService.obtenerProductosDebajoUmbral(umbral));
     }
 }
