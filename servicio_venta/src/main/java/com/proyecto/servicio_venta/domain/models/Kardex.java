@@ -1,10 +1,7 @@
 package com.proyecto.servicio_venta.domain.models;
 
 import com.proyecto.servicio_venta.common.enums.TipoMovimiento;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,10 +21,13 @@ public class Kardex {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long productoId;
+
+    @Enumerated(EnumType.STRING)
     private TipoMovimiento tipoMovimiento;
     private Integer cantidad;
     private LocalDate fechaMovimiento;
-    private BigDecimal precioUnitario;
+    private BigDecimal costoCompra;
+    private BigDecimal precioVenta;
     private Long ventaId;
     private Long loteId;
     private Long proveedorId;

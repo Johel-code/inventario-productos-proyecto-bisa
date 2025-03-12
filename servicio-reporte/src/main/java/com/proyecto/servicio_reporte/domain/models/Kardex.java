@@ -1,6 +1,6 @@
-package com.proyecto.servicio_lote.domain.models;
+package com.proyecto.servicio_reporte.domain.models;
 
-import com.proyecto.servicio_lote.common.enums.TipoMovimiento;
+import com.proyecto.servicio_reporte.commons.enums.TipoMovimiento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,19 +11,22 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class Kardex {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long productoId;
+
+    @ManyToOne
+    @JoinColumn(name = "producto_id")
+    private Producto producto;
 
     @Enumerated(EnumType.STRING)
     private TipoMovimiento tipoMovimiento;
+
     private Integer cantidad;
     private LocalDate fechaMovimiento;
     private BigDecimal costoCompra;

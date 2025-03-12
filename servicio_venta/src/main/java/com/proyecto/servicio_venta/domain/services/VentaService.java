@@ -61,8 +61,10 @@ public class VentaService {
                     .tipoMovimiento(TipoMovimiento.VENTA)
                     .cantidad(actual.cantidad())
                     .fechaMovimiento(LocalDate.now())
-                    .precioUnitario(actual.precioUnitario())
+                    .costoCompra(producto.getCostoCompra())
+                    .precioVenta(actual.precioUnitario())
                     .ventaId(venta.getId())
+                    .loteId(3L)
                     .build());
         }
         return Venta.aResponse(venta, detallesDeVenta);
