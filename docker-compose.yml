@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+
+  db:
+    image: postgres:latest
+    container_name: proyecto_bisa_db
+    restart: always
+    volumes:
+      - ./db/sql:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_DB=proyecto_bisa
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - "5432:5432"
