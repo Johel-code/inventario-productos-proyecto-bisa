@@ -32,6 +32,9 @@ public class Producto {
     @OneToMany(mappedBy = "producto")
     private List<DetalleVenta> detalleVentas;
 
+    @OneToMany(mappedBy = "producto")
+    private List<Kardex> kardexes;
+
     public static ProductoUmbralResponse aResponse(Producto producto) {
         return new ProductoUmbralResponse(
                 producto.id,

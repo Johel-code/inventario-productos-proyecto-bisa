@@ -76,7 +76,7 @@ public class LoteService {
                 .tipoMovimiento(TipoMovimiento.COMPRA)
                 .cantidad(request.cantidad())
                 .fechaMovimiento(LocalDate.now())
-                .precioUnitario(request.precioUnitario())
+                .costoCompra(request.precioUnitario())
                 .loteId(lote.getId())
                 .proveedorId(proveedor.getId())
                 .build());

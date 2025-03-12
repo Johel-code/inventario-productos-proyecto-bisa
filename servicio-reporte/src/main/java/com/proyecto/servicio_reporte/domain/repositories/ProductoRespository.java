@@ -18,4 +18,5 @@ public interface ProductoRespository extends JpaRepository<Producto, Long> {
     Page<ProductoMasVendidoResponse> obtenerProductosOrdenadosPorCantidadVendida(Pageable pageable);
 
     List<ProductoUmbralResponse> findByCantidadStockLessThan(Integer umbral);
+
 }
