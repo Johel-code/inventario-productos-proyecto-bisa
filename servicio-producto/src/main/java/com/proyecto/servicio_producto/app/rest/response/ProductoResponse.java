@@ -10,7 +10,7 @@ public record ProductoResponse(
         BigDecimal precioVenta,
         Integer cantidadStock,
         Integer minStock,
-        //Double porcentajeGanancia,
+        Double porcentajeGanancia,
         Long categoriaId
 ) {
 }

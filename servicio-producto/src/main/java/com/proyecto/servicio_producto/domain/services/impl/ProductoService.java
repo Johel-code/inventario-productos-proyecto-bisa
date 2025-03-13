@@ -44,14 +44,15 @@ public class ProductoService implements IProductoService {
 
         String codigo = GeneradorCodigoProducto.generateCodigo(request.nombre());
         if(productoRepository.existsByCodigoProducto(codigo)) throw new RuntimeException("El producto ya existe en la base de datos");
+
         var producto = Producto.builder()
                 .codigoProducto(codigo)
                 .nombre(request.nombre())
                 .costoCompra(request.costoCompra())
-                .precioVenta(request.precioVenta())
+                .precioVenta(calcularPrecioVenta(request.costoCompra(), request.porcentajeGanancia()))
                 .cantidadStock(0)
                 .minStock(request.minStock())
-                //.porcentajeGanancia(request.porcentajeGanancia())
+                .porcentajeGanancia(request.porcentajeGanancia())
                 .categoria(categoria)
                 .build();
         var saved = productoRepository.save(producto);
@@ -61,12 +62,25 @@ public class ProductoService implements IProductoService {
     @Override
     public ProductoResponse actualizar(ProductoRequest request, Long id) {
         var producto = productoRepository.findById(id).orElseThrow();
+        if(request.nombre()!=null) {
+            producto.setNombre(request.nombre());
+            String codigo = GeneradorCodigoProducto.generateCodigo(request.nombre());
+            if(productoRepository.existsByCodigoProducto(codigo)) throw new RuntimeException("El producto ya existe en la base de datos");   producto.setNombre(request.nombre());
+            producto.setCodigoProducto(codigo);
+        }
         producto.setCostoCompra(request.costoCompra());
-        producto.setPrecioVenta(request.precioVenta());
+        producto.setPorcentajeGanancia(request.porcentajeGanancia());
+        producto.setPrecioVenta(calcularPrecioVenta(request.costoCompra(), request.porcentajeGanancia()));
         producto.setMinStock(request.minStock());
-        //producto.setPorcentajeGanancia(request.porcentajeGanancia());
+        if(request.categoriaId()!=null) {
+            producto.setCategoria(categoriaRepository.findById(request.categoriaId()).orElseThrow());
+        }
         var saved = productoRepository.save(producto);
         return Producto.aResponse(saved);
+    }
+
+    private BigDecimal calcularPrecioVenta(BigDecimal costoCompra, Double porcentajeGanancia) {
+        return costoCompra.add(costoCompra.multiply(BigDecimal.valueOf(porcentajeGanancia)));
     }
 
     @Override
@@ -74,13 +88,6 @@ public class ProductoService implements IProductoService {
         var producto = productoRepository.findById(aLong).orElseThrow();
         productoRepository.delete(producto);
     }
-
-//    public ProductoResponse actualizarStock(ProductoCantidadRequest request, Long id) {
-//        var producto = productoRepository.findById(id).orElseThrow();
-//        producto.setCantidadStock(request.cantidadStock());
-//        var saved = productoRepository.save(producto);
-//        return Producto.toProductoResponse(saved);
-//    }
 
     public void validarPrecio(BigDecimal costoCompra, BigDecimal precioVenta) {
         BigDecimal precioMinimo = costoCompra.multiply(new BigDecimal("0.75"));
