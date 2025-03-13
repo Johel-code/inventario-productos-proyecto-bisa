@@ -69,7 +69,11 @@ public class VentaService {
                 if(cantidadRequerida <= 0) break;
 
                 int cantidadATomar = Math.min(cantidadRequerida, lote.getCantidad());
-                loteFeignClient.actualizarStock(lote.getId(), new LoteCantidadRequest(lote.getCantidad() - cantidadATomar));
+
+                int cantidadStockLote = lote.getCantidad() - cantidadATomar;
+                if(cantidadStockLote == 0) productoFeignClient.actualizarCostoCompra(producto.getId());
+
+                loteFeignClient.actualizarStock(lote.getId(), new LoteCantidadRequest(cantidadStockLote));
 
                 kardexRepository.save(Kardex.builder()
                         .productoId(producto.getId())

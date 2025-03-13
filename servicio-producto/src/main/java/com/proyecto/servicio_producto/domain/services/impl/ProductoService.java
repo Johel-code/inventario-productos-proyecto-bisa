@@ -4,6 +4,7 @@ import com.proyecto.servicio_producto.app.rest.request.ProductoCantidadRequest;
 import com.proyecto.servicio_producto.app.rest.request.ProductoRequest;
 import com.proyecto.servicio_producto.app.rest.response.ProductoResponse;
 import com.proyecto.servicio_producto.commons.utils.GeneradorCodigoProducto;
+import com.proyecto.servicio_producto.domain.models.Lote;
 import com.proyecto.servicio_producto.domain.models.Producto;
 import com.proyecto.servicio_producto.domain.repositories.CategoriaRepository;
 import com.proyecto.servicio_producto.domain.repositories.ProductoRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -70,7 +72,8 @@ public class ProductoService implements IProductoService {
         }
         producto.setCostoCompra(request.costoCompra());
         producto.setPorcentajeGanancia(request.porcentajeGanancia());
-        producto.setPrecioVenta(calcularPrecioVenta(request.costoCompra(), request.porcentajeGanancia()));
+        producto.setPrecioVenta(calcularPrecioVenta(request.costoCompra(),
+                request.porcentajeGanancia() != null ? request.porcentajeGanancia() : producto.getPorcentajeGanancia()));
         producto.setMinStock(request.minStock());
         if(request.categoriaId()!=null) {
             producto.setCategoria(categoriaRepository.findById(request.categoriaId()).orElseThrow());
@@ -80,7 +83,7 @@ public class ProductoService implements IProductoService {
     }
 
     private BigDecimal calcularPrecioVenta(BigDecimal costoCompra, Double porcentajeGanancia) {
-        return costoCompra.add(costoCompra.multiply(BigDecimal.valueOf(porcentajeGanancia)));
+        return costoCompra.add(costoCompra.multiply(BigDecimal.valueOf(porcentajeGanancia + IMPUESTO_IVA + IMPUESTO_IT)));
     }
 
     @Override
@@ -89,17 +92,34 @@ public class ProductoService implements IProductoService {
         productoRepository.delete(producto);
     }
 
-    public void validarPrecio(BigDecimal costoCompra, BigDecimal precioVenta) {
-        BigDecimal precioMinimo = costoCompra.multiply(new BigDecimal("0.75"));
-        BigDecimal precioMaximo = costoCompra.add(precioMinimo);
-        if (precioVenta.compareTo(precioMinimo) < 0 || precioVenta.compareTo(precioMaximo) > 0) {
-            throw new RuntimeException("El precio de venta no es valido");
-        }
-    }
-
     public void actualizarStock(Long id, ProductoCantidadRequest request) {
         var producto = productoRepository.findById(id).orElseThrow();
         producto.setCantidadStock(request.cantidadStock());
         productoRepository.save(producto);
     }
+
+    public void actualizarCostoCompra(Long id) {
+        var producto = productoRepository.findById(id).orElseThrow();
+        var lotes = producto.getLotes();
+
+        BigDecimal sumaCostosPonderados = BigDecimal.ZERO;
+        int sumaCantidades = 0;
+
+        for(Lote lote : lotes) {
+            sumaCostosPonderados = sumaCostosPonderados.add(
+                    lote.getCostoCompra().multiply(BigDecimal.valueOf(lote.getCantidad()))
+            );
+            sumaCantidades += lote.getCantidad();
+        }
+
+        BigDecimal nuevoCostoCompra = sumaCantidades == 0 ? BigDecimal.ZERO :
+                sumaCostosPonderados.divide(BigDecimal.valueOf(sumaCantidades), 2, RoundingMode.HALF_UP);
+
+        producto.setCostoCompra(nuevoCostoCompra);
+        producto.setPrecioVenta(calcularPrecioVenta(nuevoCostoCompra, producto.getPorcentajeGanancia()));
+        productoRepository.save(producto);
+    }
+
+    private final static Double IMPUESTO_IVA = 0.13;
+    private final static Double IMPUESTO_IT  = 0.03;
 }

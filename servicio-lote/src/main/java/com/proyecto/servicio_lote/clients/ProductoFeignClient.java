@@ -10,4 +10,7 @@ public interface ProductoFeignClient {
 
     @PutMapping(path = "actualizar-stock/{id}")
     void actualizarStock(@PathVariable Long id, @RequestBody ProductoCantidadRequest cantidad);
+
+    @PutMapping(path = "actualizar-costo-compra/{id}")
+    void actualizarCostoCompra(@PathVariable Long id);
 }

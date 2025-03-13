@@ -45,6 +45,7 @@ public class LoteService {
                 .fechaExpiracion(request.fechaExpiracion())
                 .build());
 
+        actualizarCostoCompraProducto(producto.getId());
         actualizarStockProducto(request.cantidad(), producto);
         actualizarKardex(request, producto.getId(), lote.getId(), proveedor.getId());
 
@@ -63,6 +64,10 @@ public class LoteService {
         var lote = loteRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe el lote"));
         lote.setCantidad(request.cantidad());
         loteRepository.save(lote);
+    }
+
+    private void actualizarCostoCompraProducto(Long productoId){
+        productoFeignClient.actualizarCostoCompra(productoId);
     }
 
     private void actualizarStockProducto(Integer cantidad, Producto producto) {

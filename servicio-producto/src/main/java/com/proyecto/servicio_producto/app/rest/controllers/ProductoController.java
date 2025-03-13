@@ -51,9 +51,10 @@ public class ProductoController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/validar-precio")
-    public ResponseEntity<Void> validarPrecio(@RequestParam BigDecimal costoCompra,@RequestParam BigDecimal precioVenta) {
-        productoService.validarPrecio(costoCompra, precioVenta);
-        return ResponseEntity.noContent().build();
+    @PutMapping(path = "actualizar-costo-compra/{id}")
+    public ResponseEntity<Void> actualizarCostoCompra(@PathVariable Long id) {
+        productoService.actualizarCostoCompra(id);
+        return ResponseEntity.ok().build();
+
     }
 }

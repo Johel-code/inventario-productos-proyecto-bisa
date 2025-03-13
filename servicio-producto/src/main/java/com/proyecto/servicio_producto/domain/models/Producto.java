@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Data
@@ -32,6 +33,9 @@ public class Producto {
   @JoinColumn(name = "categoria_id")
   private Categoria categoria;
 
+  @OneToMany(mappedBy = "producto")
+  private List<Lote> lotes;
+
   public static ProductoResponse aResponse(Producto producto) {
     return new ProductoResponse(
         producto.id,
@@ -41,6 +45,7 @@ public class Producto {
         producto.precioVenta,
         producto.cantidadStock,
         producto.minStock,
+        producto.porcentajeGanancia,
         producto.getCategoria().getId()
     );
   }
