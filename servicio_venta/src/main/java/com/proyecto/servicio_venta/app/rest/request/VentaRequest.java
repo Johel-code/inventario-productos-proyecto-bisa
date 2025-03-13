@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record VentaRequest(
-        BigDecimal totalVenta,
         List<DetalleVentaRequest> detalleVenta
 ) {
 }

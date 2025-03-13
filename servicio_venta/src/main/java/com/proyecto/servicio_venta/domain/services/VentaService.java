@@ -1,21 +1,21 @@
 package com.proyecto.servicio_venta.domain.services;
 
 import com.proyecto.servicio_venta.app.rest.request.DetalleVentaRequest;
+import com.proyecto.servicio_venta.app.rest.request.LoteCantidadRequest;
 import com.proyecto.servicio_venta.app.rest.request.ProductoCantidadRequest;
 import com.proyecto.servicio_venta.app.rest.request.VentaRequest;
 import com.proyecto.servicio_venta.app.rest.response.DetalleVentaResponse;
 import com.proyecto.servicio_venta.app.rest.response.VentaResponse;
+import com.proyecto.servicio_venta.clients.LoteFeignClient;
 import com.proyecto.servicio_venta.clients.ProductoFeignClient;
 import com.proyecto.servicio_venta.common.enums.TipoMovimiento;
-import com.proyecto.servicio_venta.domain.models.DetalleVenta;
-import com.proyecto.servicio_venta.domain.models.Kardex;
-import com.proyecto.servicio_venta.domain.models.Producto;
-import com.proyecto.servicio_venta.domain.models.Venta;
+import com.proyecto.servicio_venta.domain.models.*;
 import com.proyecto.servicio_venta.domain.repositories.DetalleVentaRepository;
 import com.proyecto.servicio_venta.domain.repositories.KardexRepository;
 import com.proyecto.servicio_venta.domain.repositories.VentaRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,9 +26,11 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 @Transactional
+@Slf4j
 public class VentaService {
 
     private final ProductoFeignClient productoFeignClient;
+    private final LoteFeignClient loteFeignClient;
     private final VentaRepository ventaRepository;
     private final DetalleVentaRepository detalleVentaRepository;
     private final KardexRepository kardexRepository;
@@ -42,11 +44,11 @@ public class VentaService {
 
         BigDecimal totalVenta = BigDecimal.ZERO;
 
-        for (DetalleVentaRequest actual : request.detalleVenta()) {
-            Producto producto = productoFeignClient.mostrarProductoPorId(actual.productoId());
+        for (DetalleVentaRequest requestActual : request.detalleVenta()) {
+            Producto producto = productoFeignClient.mostrarProductoPorId(requestActual.productoId());
 
-            Integer cantidadRequerida = actual.cantidad();
-            BigDecimal precioVenta = (actual.precioUnitario()==null)?producto.getPrecioVenta():actual.precioUnitario();
+            Integer cantidadRequerida = requestActual.cantidad();
+            BigDecimal precioVenta = (requestActual.precioUnitario()==null)?producto.getPrecioVenta():requestActual.precioUnitario();
             totalVenta = totalVenta.add(precioVenta.multiply(BigDecimal.valueOf(cantidadRequerida)));
 
             validarVenta(producto, precioVenta, cantidadRequerida);
@@ -83,19 +85,8 @@ public class VentaService {
                 cantidadRequerida -= cantidadATomar;
             }
 
-            ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() - actual.cantidad());
+            ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() - requestActual.cantidad());
             productoFeignClient.actualizarStock(producto.getId(), requestCantidad);
-
-            kardexRepository.save(Kardex.builder()
-                    .productoId(producto.getId())
-                    .tipoMovimiento(TipoMovimiento.VENTA)
-                    .cantidad(actual.cantidad())
-                    .fechaMovimiento(LocalDate.now())
-                    .costoCompra(producto.getCostoCompra())
-                    .precioVenta(actual.precioUnitario())
-                    .ventaId(venta.getId())
-                    .loteId(3L)
-                    .build());
         }
 
         venta.setTotalVenta(totalVenta);
@@ -104,10 +95,9 @@ public class VentaService {
         return Venta.aResponse(venta, detallesDeVenta);
     }
 
-    private void validarVenta(Producto producto, DetalleVentaRequest actual) {
-        if (producto.getCantidadStock() < actual.cantidad()) throw new RuntimeException("Cantidad en stock insuficiente");
+    private void validarVenta(Producto producto, BigDecimal precioVenta, Integer cantidadRequerida) {
+        if (producto.getCantidadStock() < cantidadRequerida) throw new RuntimeException("Cantidad en stock insuficiente para el producto " + producto.getId());
 
-        BigDecimal precioVenta = (actual.precioUnitario()==null)?producto.getPrecioVenta():actual.precioUnitario();
         BigDecimal costoCompra = producto.getCostoCompra();
         BigDecimal precioMinimo = costoCompra.multiply(BigDecimal.valueOf(0.75));
         BigDecimal precioMaximo = costoCompra.multiply(BigDecimal.valueOf(1.75));
