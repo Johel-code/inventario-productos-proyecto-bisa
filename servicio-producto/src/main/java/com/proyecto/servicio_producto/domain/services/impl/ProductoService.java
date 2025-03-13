@@ -69,6 +69,10 @@ public class ProductoService implements IProductoService {
         return Producto.aResponse(saved);
     }
 
+    private BigDecimal calcularPrecioVenta(BigDecimal costoCompra, Double porcentajeGanancia) {
+        return costoCompra.add(costoCompra.multiply(BigDecimal.valueOf(porcentajeGanancia)));
+    }
+
     @Override
     public void eliminar(Long aLong) {
         var producto = productoRepository.findById(aLong).orElseThrow();
