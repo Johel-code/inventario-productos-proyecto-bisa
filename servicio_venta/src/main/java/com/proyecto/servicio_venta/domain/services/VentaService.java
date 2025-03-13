@@ -42,7 +42,12 @@ public class VentaService {
 
         for (DetalleVentaRequest actual : request.detalleVenta()) {
             Producto producto = productoFeignClient.mostrarProductoPorId(actual.productoId());
-            validarVenta(producto, actual);
+
+            Integer cantidadRequerida = actual.cantidad();
+            BigDecimal precioVenta = (actual.precioUnitario()==null)?producto.getPrecioVenta():actual.precioUnitario();
+            totalVenta = totalVenta.add(precioVenta.multiply(BigDecimal.valueOf(cantidadRequerida)));
+
+            validarVenta(producto, precioVenta, cantidadRequerida);
 
             DetalleVenta detalleVenta = detalleVentaRepository.save(DetalleVenta.builder()
                     .productoId(producto.getId())
