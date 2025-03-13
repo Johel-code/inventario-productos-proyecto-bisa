@@ -37,7 +37,7 @@ public class VentaService {
         List<DetalleVentaResponse> detallesDeVenta = new ArrayList<>();
         var venta = ventaRepository.save(Venta.builder()
                 .fecha(LocalDate.now())
-                .totalVenta(request.totalVenta())
+                .totalVenta(BigDecimal.ZERO)
                 .build());
 
         BigDecimal totalVenta = BigDecimal.ZERO;
