@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -25,6 +26,7 @@ public class Lote {
     private Producto producto;
 
     private Integer cantidad;
+    private BigDecimal costoCompra;
     private LocalDate fechaAdquisicion;
     private LocalDate fechaExpiracion;
 
@@ -37,6 +39,7 @@ public class Lote {
             lote.id,
                 lote.producto.getId(),
                 lote.cantidad,
+                lote.costoCompra,
                 lote.fechaAdquisicion,
                 lote.fechaExpiracion,
                 Proveedor.aResponse(lote.proveedor)

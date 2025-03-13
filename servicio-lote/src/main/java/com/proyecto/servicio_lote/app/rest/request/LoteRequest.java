@@ -6,7 +6,7 @@ import java.time.LocalDate;
 public record LoteRequest(
         Long proveedorId,
         Long productoId,
-        BigDecimal precioUnitario,
+        BigDecimal costoCompra,
         Integer cantidad,
         LocalDate fechaExpiracion
 ) {

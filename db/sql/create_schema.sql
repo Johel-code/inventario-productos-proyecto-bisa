@@ -54,6 +54,7 @@ CREATE TABLE lote
  producto_id       bigserial NOT NULL,
  proveedor_id      bigserial NOT NULL,
  cantidad           int NOT NULL,
+ costo_compra     double precision NOT NULL,
  fecha_adquisicion  date NOT NULL,
  fecha_expiracion   date NULL,
  CONSTRAINT PK_6 PRIMARY KEY ( "id" ),

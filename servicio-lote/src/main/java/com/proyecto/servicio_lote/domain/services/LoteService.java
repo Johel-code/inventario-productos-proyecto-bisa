@@ -9,7 +9,6 @@ import com.proyecto.servicio_lote.common.enums.TipoMovimiento;
 import com.proyecto.servicio_lote.domain.models.Kardex;
 import com.proyecto.servicio_lote.domain.models.Lote;
 import com.proyecto.servicio_lote.domain.models.Producto;
-import com.proyecto.servicio_lote.domain.models.Proveedor;
 import com.proyecto.servicio_lote.domain.repositories.KardexRepository;
 import com.proyecto.servicio_lote.domain.repositories.LoteRepository;
 import com.proyecto.servicio_lote.domain.repositories.ProductoRepository;
@@ -41,19 +40,20 @@ public class LoteService {
                 .producto(producto)
                 .proveedor(proveedor)
                 .cantidad(request.cantidad())
+                .costoCompra(request.costoCompra())
                 .fechaAdquisicion(LocalDate.now())
                 .fechaExpiracion(request.fechaExpiracion())
                 .build());
 
-        actualizarStockProducto(request, producto);
-        actualizarKardex(request, producto, lote, proveedor);
+        actualizarStockProducto(request.cantidad(), producto);
+        actualizarKardex(request, producto.getId(), lote.getId(), proveedor.getId());
 
         return Lote.aResponse(lote);
     }
 
     public List<LoteResponse> obtenerLotesPorIdProducto(Long productoId){
         var producto = productoRepository.findById(productoId).orElseThrow(() -> new RuntimeException("No existe el producto"));
-        var lotes = loteRepository.findByProducto(producto);
+        var lotes = loteRepository.encontrarLotesPorIdProductoOrdenadosPorExpiracion(productoId);
         return lotes.stream()
                 .map(Lote::aResponse)
                 .toList();
@@ -65,20 +65,20 @@ public class LoteService {
         loteRepository.save(lote);
     }
 
-    private void actualizarStockProducto(LoteRequest request, Producto producto) {
-        ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() + request.cantidad());
+    private void actualizarStockProducto(Integer cantidad, Producto producto) {
+        ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() + cantidad);
         productoFeignClient.actualizarStock(producto.getId(), requestCantidad);
     }
 
-    private void actualizarKardex(LoteRequest request, Producto producto, Lote lote, Proveedor proveedor) {
+    private void actualizarKardex(LoteRequest request, Long productoId, Long loteId, Long proveedorId) {
         kardexRepository.save(Kardex.builder()
-                .productoId(producto.getId())
+                .productoId(productoId)
                 .tipoMovimiento(TipoMovimiento.COMPRA)
                 .cantidad(request.cantidad())
                 .fechaMovimiento(LocalDate.now())
-                .costoCompra(request.precioUnitario())
-                .loteId(lote.getId())
-                .proveedorId(proveedor.getId())
+                .costoCompra(request.costoCompra())
+                .loteId(loteId)
+                .proveedorId(proveedorId)
                 .build());
     }
 }
