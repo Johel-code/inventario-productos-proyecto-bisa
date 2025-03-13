@@ -40,6 +40,8 @@ public class VentaService {
                 .totalVenta(request.totalVenta())
                 .build());
 
+        BigDecimal totalVenta = BigDecimal.ZERO;
+
         for (DetalleVentaRequest actual : request.detalleVenta()) {
             Producto producto = productoFeignClient.mostrarProductoPorId(actual.productoId());
 
