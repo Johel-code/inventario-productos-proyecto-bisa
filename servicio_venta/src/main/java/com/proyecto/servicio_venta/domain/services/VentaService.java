@@ -58,6 +58,29 @@ public class VentaService {
 
             detallesDeVenta.add(DetalleVenta.aResponse(detalleVenta));
 
+            List<Lote> lotes = loteFeignClient.obtenerLotesOrdenadosPorVencimiento(producto.getId());
+
+            for(Lote lote : lotes){
+
+                if(cantidadRequerida <= 0) break;
+
+                int cantidadATomar = Math.min(cantidadRequerida, lote.getCantidad());
+                loteFeignClient.actualizarStock(lote.getId(), new LoteCantidadRequest(lote.getCantidad() - cantidadATomar));
+
+                kardexRepository.save(Kardex.builder()
+                        .productoId(producto.getId())
+                        .tipoMovimiento(TipoMovimiento.VENTA)
+                        .cantidad(cantidadATomar)
+                        .fechaMovimiento(LocalDate.now())
+                        .costoCompra(lote.getCostoCompra())
+                        .precioVenta(precioVenta)
+                        .ventaId(venta.getId())
+                        .loteId(lote.getId())
+                        .build());
+
+                cantidadRequerida -= cantidadATomar;
+            }
+
             ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() - actual.cantidad());
             productoFeignClient.actualizarStock(producto.getId(), requestCantidad);
 
