@@ -23,8 +23,8 @@ public class LoteController {
         return ResponseEntity.ok(loteService.registrarLote(request));
     }
 
-    @GetMapping(path = "producto/{id}")
-    public ResponseEntity<List<LoteResponse>> obtenerLotesPorIdProducto(@PathVariable Long id) {
+    @GetMapping(path = "producto-vencimiento/{id}")
+    public ResponseEntity<List<LoteResponse>> obtenerLotesPorIdProductoOrdenadosPorVencimiento(@PathVariable Long id) {
         return ResponseEntity.ok(loteService.obtenerLotesPorIdProducto(id));
     }
 
