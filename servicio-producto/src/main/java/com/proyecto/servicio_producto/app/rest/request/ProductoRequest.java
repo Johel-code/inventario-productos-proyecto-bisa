@@ -5,9 +5,8 @@ import java.math.BigDecimal;
 public record ProductoRequest(
         String nombre,
         BigDecimal costoCompra,
-        BigDecimal precioVenta,
         Integer minStock,
-        //Double porcentajeGanancia,
+        Double porcentajeGanancia,
         Long categoriaId
 ) {
 }

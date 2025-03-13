@@ -26,7 +26,7 @@ public class Producto {
   private BigDecimal precioVenta;
   private Integer cantidadStock;
   private Integer minStock;
-  //private Double porcentajeGanancia;
+  private Double porcentajeGanancia;
 
   @ManyToOne
   @JoinColumn(name = "categoria_id")
