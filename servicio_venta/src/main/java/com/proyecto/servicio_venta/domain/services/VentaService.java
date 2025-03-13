@@ -52,8 +52,8 @@ public class VentaService {
             DetalleVenta detalleVenta = detalleVentaRepository.save(DetalleVenta.builder()
                     .productoId(producto.getId())
                     .venta(venta)
-                    .cantidad(actual.cantidad())
-                    .precioUnitario(actual.precioUnitario())
+                    .cantidad(cantidadRequerida)
+                    .precioUnitario(precioVenta)
                     .build());
 
             detallesDeVenta.add(DetalleVenta.aResponse(detalleVenta));
