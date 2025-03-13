@@ -95,6 +95,10 @@ public class VentaService {
                     .loteId(3L)
                     .build());
         }
+
+        venta.setTotalVenta(totalVenta);
+        ventaRepository.save(venta);
+
         return Venta.aResponse(venta, detallesDeVenta);
     }
 
