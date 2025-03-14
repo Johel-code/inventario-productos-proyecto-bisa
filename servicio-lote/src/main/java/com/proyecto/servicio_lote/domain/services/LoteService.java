@@ -3,9 +3,11 @@ package com.proyecto.servicio_lote.domain.services;
 import com.proyecto.servicio_lote.app.rest.request.LoteCantidadRequest;
 import com.proyecto.servicio_lote.app.rest.request.LoteRequest;
 import com.proyecto.servicio_lote.app.rest.request.ProductoCantidadRequest;
+import com.proyecto.servicio_lote.app.rest.request.ProductoCostoCompraRequest;
 import com.proyecto.servicio_lote.app.rest.response.LoteResponse;
 import com.proyecto.servicio_lote.clients.ProductoFeignClient;
 import com.proyecto.servicio_lote.common.enums.TipoMovimiento;
+import com.proyecto.servicio_lote.common.exceptions.IdNotFoudException;
 import com.proyecto.servicio_lote.domain.models.Kardex;
 import com.proyecto.servicio_lote.domain.models.Lote;
 import com.proyecto.servicio_lote.domain.models.Producto;
@@ -15,14 +17,17 @@ import com.proyecto.servicio_lote.domain.repositories.ProductoRepository;
 import com.proyecto.servicio_lote.domain.repositories.ProveedorRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 @Transactional
+@Slf4j
 public class LoteService {
 
     private final ProductoFeignClient productoFeignClient;
@@ -32,8 +37,8 @@ public class LoteService {
     private final KardexRepository kardexRepository;
 
     public LoteResponse registrarLote(LoteRequest request){
-        var proveedor = proveedorRepository.findById(request.proveedorId()).orElseThrow(() -> new RuntimeException("No existe el proveedor"));
-        var producto = productoRepository.findById(request.productoId()).orElseThrow(() -> new RuntimeException("No existe el producto"));
+        var proveedor = proveedorRepository.findById(request.proveedorId()).orElseThrow(() -> new IdNotFoudException("Proveedor"));
+        var producto = productoRepository.findById(request.productoId()).orElseThrow(() -> new IdNotFoudException("Producto"));
 
 
         Lote lote = loteRepository.save(Lote.builder()
@@ -45,30 +50,38 @@ public class LoteService {
                 .fechaExpiracion(request.fechaExpiracion())
                 .build());
 
-        actualizarStockProducto(request.cantidad(), producto);
+//        actualizarCostoCompraProducto(producto.getId(), request.costoCompra());
+        //actualizarStockProducto(request.cantidad(), producto);
+        producto.actualizarCostoCompra();
         actualizarKardex(request, producto.getId(), lote.getId(), proveedor.getId());
 
         return Lote.aResponse(lote);
     }
 
     public List<LoteResponse> obtenerLotesPorIdProducto(Long productoId){
-        var producto = productoRepository.findById(productoId).orElseThrow(() -> new RuntimeException("No existe el producto"));
+        var producto = productoRepository.findById(productoId).orElseThrow(() -> new IdNotFoudException("Producto"));
         var lotes = loteRepository.encontrarLotesPorIdProductoOrdenadosPorExpiracion(productoId);
+        log.info("lotes: " + lotes);
         return lotes.stream()
                 .map(Lote::aResponse)
                 .toList();
     }
 
     public void actualizarStockLote(Long id, LoteCantidadRequest request){
-        var lote = loteRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe el lote"));
+        var lote = loteRepository.findById(id).orElseThrow(() -> new IdNotFoudException("Lote"));
         lote.setCantidad(request.cantidad());
         loteRepository.save(lote);
     }
 
-    private void actualizarStockProducto(Integer cantidad, Producto producto) {
-        ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() + cantidad);
-        productoFeignClient.actualizarStock(producto.getId(), requestCantidad);
+    private void actualizarCostoCompraProducto(Long productoId, BigDecimal costoCompra){
+//        ProductoCostoCompraRequest request = new ProductoCostoCompraRequest(costoCompra);
+//        productoFeignClient.actualizarCostoCompra(productoId, request);
     }
+
+//    private void actualizarStockProducto(Integer cantidad, Producto producto) {
+//        ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() + cantidad);
+//        productoFeignClient.actualizarStock(producto.getId(), requestCantidad);
+//    }
 
     private void actualizarKardex(LoteRequest request, Long productoId, Long loteId, Long proveedorId) {
         kardexRepository.save(Kardex.builder()

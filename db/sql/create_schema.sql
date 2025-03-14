@@ -12,9 +12,8 @@ CREATE TABLE producto
  nombre             varchar(50) NOT NULL,
  costo_compra       double precision NOT NULL,
  precio_venta       double precision NOT NULL,
- cantidad_stock     int NOT NULL DEFAULT 0,
  min_stock          int NOT NULL,
- --porcentaje_ganancia  decimal(5, 2) NOT NULL,
+ porcentaje_ganancia  decimal(5, 2) NOT NULL,
  categoria_id         bigint NOT NULL,
  CONSTRAINT PK_1 PRIMARY KEY ( "id" ),
  CONSTRAINT FK_1 FOREIGN KEY ( categoria_id ) REFERENCES categoria ( "id" )

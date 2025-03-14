@@ -1,7 +1,10 @@
-package com.proyecto.servicio_venta.domain.models;
+package com.proyecto.servicio_reporte.domain.models;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,13 +24,11 @@ public class Lote {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
-    @ManyToOne()
-    @JoinColumn(name = "proveedor_id")
-    private Proveedor proveedor;
-
     private Integer cantidad;
     private BigDecimal costoCompra;
     private LocalDate fechaAdquisicion;
     private LocalDate fechaExpiracion;
+
+    private Long proveedorId;
 
 }

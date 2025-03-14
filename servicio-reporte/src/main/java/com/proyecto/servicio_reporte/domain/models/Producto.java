@@ -24,10 +24,12 @@ public class Producto {
     private String nombre;
     private BigDecimal costoCompra;
     private BigDecimal precioVenta;
-    private Integer cantidadStock;
     private Integer minStock;
 
     private Long categoriaId;
+
+    @OneToMany(mappedBy = "producto")
+    private List<Lote> lotes;
 
     @OneToMany(mappedBy = "producto")
     private List<DetalleVenta> detalleVentas;
@@ -35,16 +37,21 @@ public class Producto {
     @OneToMany(mappedBy = "producto")
     private List<Kardex> kardexes;
 
+    public int getCantidadStock() {
+        int cantidadStock = 0;
+        for (Lote lote : lotes) {
+            cantidadStock += lote.getCantidad();
+        }
+        return cantidadStock;
+    }
+
     public static ProductoUmbralResponse aResponse(Producto producto) {
+        int cantidad = producto.getLotes() == null ? 0 : producto.getCantidadStock();
         return new ProductoUmbralResponse(
                 producto.id,
                 producto.codigoProducto,
                 producto.nombre,
-                producto.costoCompra,
-                producto.precioVenta,
-                producto.cantidadStock,
-                producto.minStock,
-                producto.categoriaId
+                cantidad
         );
     }
 }

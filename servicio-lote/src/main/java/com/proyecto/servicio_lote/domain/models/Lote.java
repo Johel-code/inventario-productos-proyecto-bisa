@@ -2,10 +2,7 @@ package com.proyecto.servicio_lote.domain.models;
 
 import com.proyecto.servicio_lote.app.rest.response.LoteResponse;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,6 +18,7 @@ public class Lote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "producto_id")
     private Producto producto;
@@ -30,6 +28,7 @@ public class Lote {
     private LocalDate fechaAdquisicion;
     private LocalDate fechaExpiracion;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "proveedor_id")
     private Proveedor proveedor;

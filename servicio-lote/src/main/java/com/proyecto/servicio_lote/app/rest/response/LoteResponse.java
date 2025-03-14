@@ -1,5 +1,6 @@
 package com.proyecto.servicio_lote.app.rest.response;
 
+import com.proyecto.servicio_lote.domain.models.Producto;
 import com.proyecto.servicio_lote.domain.models.Proveedor;
 
 import java.math.BigDecimal;
@@ -10,7 +11,7 @@ public record LoteResponse (
         Long productoId,
         Integer cantidad,
         BigDecimal costoCompra,
-        LocalDate fechaAquisicion,
+        LocalDate fechaAdquisicion,
         LocalDate fechaExpiracion,
         ProveedorResponse proveedor
 ){

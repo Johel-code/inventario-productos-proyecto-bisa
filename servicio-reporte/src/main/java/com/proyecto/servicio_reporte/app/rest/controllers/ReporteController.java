@@ -4,13 +4,11 @@ import com.proyecto.servicio_reporte.app.rest.request.GananciaRangoFechaRequest;
 import com.proyecto.servicio_reporte.app.rest.response.GananciaRangoFechaResponse;
 import com.proyecto.servicio_reporte.app.rest.response.ProductoMasVendidoResponse;
 import com.proyecto.servicio_reporte.app.rest.response.ProductoUmbralResponse;
-import com.proyecto.servicio_reporte.domain.services.ProductoService;
 import com.proyecto.servicio_reporte.domain.services.ReporteService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -18,22 +16,21 @@ import java.util.List;
 @AllArgsConstructor
 public class ReporteController {
 
-    private ProductoService productoService;
     private ReporteService reporteService;
 
     @GetMapping(path = "mas-vendidos")
     public ResponseEntity<List<ProductoMasVendidoResponse>> obtenerNProductosMasVendidos(@RequestParam Integer cantidad) {
-        return ResponseEntity.ok(productoService.obtenerProductosOrdanadosPorCantidadVendida(cantidad, "desc"));
+        return ResponseEntity.ok(reporteService.obtenerProductosOrdanadosPorCantidadVendida(cantidad, "desc"));
     }
 
     @GetMapping(path = "menos-vendidos")
     public ResponseEntity<List<ProductoMasVendidoResponse>> obtenerNProductosMenosVendidos(@RequestParam Integer cantidad) {
-        return ResponseEntity.ok(productoService.obtenerProductosOrdanadosPorCantidadVendida(cantidad, "asc"));
+        return ResponseEntity.ok(reporteService.obtenerProductosOrdanadosPorCantidadVendida(cantidad, "asc"));
     }
 
     @GetMapping(path = "debajo-umbral")
     public ResponseEntity<List<ProductoUmbralResponse>> obtenerProductoDebajoUmbral(@RequestParam(required = false) Integer umbral) {
-        return ResponseEntity.ok(productoService.obtenerProductosDebajoUmbral(umbral));
+        return ResponseEntity.ok(reporteService.obtenerProductosDebajoUmbral(umbral));
     }
 
     @PostMapping(path = "ganancia-rango-fechas")

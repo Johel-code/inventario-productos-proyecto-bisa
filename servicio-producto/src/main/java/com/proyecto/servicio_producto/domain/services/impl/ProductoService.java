@@ -1,23 +1,28 @@
 package com.proyecto.servicio_producto.domain.services.impl;
 
-import com.proyecto.servicio_producto.app.rest.request.ProductoCantidadRequest;
 import com.proyecto.servicio_producto.app.rest.request.ProductoRequest;
 import com.proyecto.servicio_producto.app.rest.response.ProductoResponse;
+import com.proyecto.servicio_producto.commons.exceptions.CodigoProductoExisteExcepcion;
+import com.proyecto.servicio_producto.commons.exceptions.IdNotFoudException;
 import com.proyecto.servicio_producto.commons.utils.GeneradorCodigoProducto;
+import com.proyecto.servicio_producto.domain.models.Lote;
 import com.proyecto.servicio_producto.domain.models.Producto;
 import com.proyecto.servicio_producto.domain.repositories.CategoriaRepository;
 import com.proyecto.servicio_producto.domain.repositories.ProductoRepository;
 import com.proyecto.servicio_producto.domain.services.abstract_service.IProductoService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 @Transactional
+@Slf4j
 public class ProductoService implements IProductoService {
 
     private final ProductoRepository productoRepository;
@@ -34,23 +39,22 @@ public class ProductoService implements IProductoService {
 
     @Override
     public ProductoResponse mostrarPorId(Long id) {
-        var producto = productoRepository.findById(id).orElseThrow();
+        var producto = productoRepository.findById(id).orElseThrow(() -> new IdNotFoudException("Producto"));
         return Producto.aResponse(producto);
     }
 
     @Override
     public ProductoResponse crear(ProductoRequest request) {
-        var categoria = categoriaRepository.findById(request.categoriaId()).orElseThrow();
+        var categoria = categoriaRepository.findById(request.categoriaId()).orElseThrow(() -> new IdNotFoudException("Categoria"));
 
         String codigo = GeneradorCodigoProducto.generateCodigo(request.nombre());
-        if(productoRepository.existsByCodigoProducto(codigo)) throw new RuntimeException("El producto ya existe en la base de datos");
+        if(productoRepository.existsByCodigoProducto(codigo)) throw new CodigoProductoExisteExcepcion();
 
         var producto = Producto.builder()
                 .codigoProducto(codigo)
                 .nombre(request.nombre())
                 .costoCompra(request.costoCompra())
-                .precioVenta(calcularPrecioVenta(request.costoCompra(), request.porcentajeGanancia()))
-                .cantidadStock(0)
+                .precioVenta(Producto.calcularPrecioVenta(request.costoCompra(), request.porcentajeGanancia()))
                 .minStock(request.minStock())
                 .porcentajeGanancia(request.porcentajeGanancia())
                 .categoria(categoria)
@@ -61,45 +65,60 @@ public class ProductoService implements IProductoService {
 
     @Override
     public ProductoResponse actualizar(ProductoRequest request, Long id) {
-        var producto = productoRepository.findById(id).orElseThrow();
+        var producto = productoRepository.findById(id).orElseThrow(() -> new IdNotFoudException("Producto"));
         if(request.nombre()!=null) {
             producto.setNombre(request.nombre());
             String codigo = GeneradorCodigoProducto.generateCodigo(request.nombre());
-            if(productoRepository.existsByCodigoProducto(codigo)) throw new RuntimeException("El producto ya existe en la base de datos");   producto.setNombre(request.nombre());
+            if(productoRepository.existsByCodigoProducto(codigo)) throw new CodigoProductoExisteExcepcion();
             producto.setCodigoProducto(codigo);
         }
         producto.setCostoCompra(request.costoCompra());
         producto.setPorcentajeGanancia(request.porcentajeGanancia());
-        producto.setPrecioVenta(calcularPrecioVenta(request.costoCompra(), request.porcentajeGanancia()));
+        producto.setPrecioVenta(Producto.calcularPrecioVenta(request.costoCompra(),
+                request.porcentajeGanancia() != null ? request.porcentajeGanancia() : producto.getPorcentajeGanancia()));
         producto.setMinStock(request.minStock());
         if(request.categoriaId()!=null) {
-            producto.setCategoria(categoriaRepository.findById(request.categoriaId()).orElseThrow());
+            producto.setCategoria(categoriaRepository.findById(request.categoriaId()).orElseThrow(() -> new IdNotFoudException("Categoria")));
         }
         var saved = productoRepository.save(producto);
         return Producto.aResponse(saved);
     }
 
-    private BigDecimal calcularPrecioVenta(BigDecimal costoCompra, Double porcentajeGanancia) {
-        return costoCompra.add(costoCompra.multiply(BigDecimal.valueOf(porcentajeGanancia)));
-    }
-
     @Override
     public void eliminar(Long aLong) {
-        var producto = productoRepository.findById(aLong).orElseThrow();
+        var producto = productoRepository.findById(aLong).orElseThrow(() -> new IdNotFoudException("Producto"));
         productoRepository.delete(producto);
     }
 
-    public void validarPrecio(BigDecimal costoCompra, BigDecimal precioVenta) {
-        BigDecimal precioMinimo = costoCompra.multiply(new BigDecimal("0.75"));
-        BigDecimal precioMaximo = costoCompra.add(precioMinimo);
-        if (precioVenta.compareTo(precioMinimo) < 0 || precioVenta.compareTo(precioMaximo) > 0) {
-            throw new RuntimeException("El precio de venta no es valido");
-        }
-    }
+//    public void actualizarStock(Long id, ProductoCantidadRequest request) {
+//        var producto = productoRepository.findById(id).orElseThrow();
+//        producto.setCantidadStock(request.cantidadStock());
+//        log.info("En servicio producto, stock actualizada: " + producto.getCantidadStock());
+//        productoRepository.save(producto);
+//    }
 
-    public void actualizarStock(Long id, ProductoCantidadRequest request) {
-        var producto = productoRepository.findById(id).orElseThrow();
-        producto.setCantidadStock(request.cantidadStock());
+    public void actualizarCostoCompra(Long id) {
+        var producto = productoRepository.findById(id).orElseThrow(() -> new IdNotFoudException("Producto"));
+        var lotes = producto.getLotes();
+
+        BigDecimal sumaCostosPonderados = BigDecimal.ZERO;
+        int sumaCantidades = 0;
+
+        for(Lote lote : lotes) {
+            sumaCostosPonderados = sumaCostosPonderados.add(
+                    lote.getCostoCompra().multiply(BigDecimal.valueOf(lote.getCantidad()))
+            );
+            sumaCantidades += lote.getCantidad();
+        }
+
+        BigDecimal nuevoCostoCompra = sumaCantidades == 0 ? BigDecimal.ZERO :
+                sumaCostosPonderados.divide(BigDecimal.valueOf(sumaCantidades), 2, RoundingMode.HALF_UP);
+
+        producto.setCostoCompra(nuevoCostoCompra);
+        log.info("En servicio producto, costo de compra actualizado: " + nuevoCostoCompra);
+        producto.setPrecioVenta(Producto.calcularPrecioVenta(nuevoCostoCompra, producto.getPorcentajeGanancia()));
+        log.info("En servicio producto, precio de venta actualizado: " + producto.getPrecioVenta());
         productoRepository.save(producto);
     }
+
 }
