@@ -1,5 +1,6 @@
 package com.proyecto.servicio_venta.domain.models;
 
+import com.proyecto.servicio_venta.common.exceptions.PrecioNoValidoException;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -67,4 +68,13 @@ public class Producto {
 
     private final static Double IMPUESTO_IVA = 0.13;
     private final static Double IMPUESTO_IT  = 0.03;
+
+    public void validarPrecio(BigDecimal precioVenta) {
+        BigDecimal precioMinimo = costoCompra.multiply(BigDecimal.valueOf(0.75));
+        BigDecimal precioMaximo = costoCompra.multiply(BigDecimal.valueOf(1.75));
+
+        if (precioVenta.compareTo(precioMinimo) < 0 || precioVenta.compareTo(precioMaximo) > 0) {
+            throw new PrecioNoValidoException(nombre);
+        }
+    }
 }

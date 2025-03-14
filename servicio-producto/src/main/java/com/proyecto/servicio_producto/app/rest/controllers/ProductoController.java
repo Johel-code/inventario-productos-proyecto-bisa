@@ -4,6 +4,7 @@ import com.proyecto.servicio_producto.app.rest.request.ProductoCostoCompraReques
 import com.proyecto.servicio_producto.app.rest.request.ProductoRequest;
 import com.proyecto.servicio_producto.app.rest.response.ProductoResponse;
 import com.proyecto.servicio_producto.domain.services.impl.ProductoService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,12 +30,12 @@ public class ProductoController {
     }
     
     @PostMapping
-    public ResponseEntity<ProductoResponse> crearProducto(@RequestBody ProductoRequest request) {
+    public ResponseEntity<ProductoResponse> crearProducto(@Valid @RequestBody ProductoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productoService.crear(request));
     }
     
     @PutMapping(path = "{id}")
-    public ResponseEntity<ProductoResponse> actualizarProducto(@RequestBody ProductoRequest request, @PathVariable Long id) {
+    public ResponseEntity<ProductoResponse> actualizarProducto(@Valid @RequestBody ProductoRequest request, @PathVariable Long id) {
         return ResponseEntity.ok(productoService.actualizar(request,id));
     }
     

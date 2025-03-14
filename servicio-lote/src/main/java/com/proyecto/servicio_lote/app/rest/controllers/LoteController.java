@@ -4,6 +4,7 @@ import com.proyecto.servicio_lote.app.rest.request.LoteCantidadRequest;
 import com.proyecto.servicio_lote.app.rest.request.LoteRequest;
 import com.proyecto.servicio_lote.app.rest.response.LoteResponse;
 import com.proyecto.servicio_lote.domain.services.LoteService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class LoteController {
     private final LoteService loteService;
 
     @PostMapping
-    public ResponseEntity<LoteResponse> registrarLote(@RequestBody LoteRequest request){
+    public ResponseEntity<LoteResponse> registrarLote(@Valid @RequestBody LoteRequest request){
         return ResponseEntity.ok(loteService.registrarLote(request));
     }
 

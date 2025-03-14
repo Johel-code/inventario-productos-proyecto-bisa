@@ -8,6 +8,9 @@ import com.proyecto.servicio_venta.app.rest.response.VentaResponse;
 import com.proyecto.servicio_venta.clients.LoteFeignClient;
 import com.proyecto.servicio_venta.clients.ProductoFeignClient;
 import com.proyecto.servicio_venta.common.enums.TipoMovimiento;
+import com.proyecto.servicio_venta.common.exceptions.CantidadInsuficienteException;
+import com.proyecto.servicio_venta.common.exceptions.IdNotFoudException;
+import com.proyecto.servicio_venta.common.exceptions.PrecioNoValidoException;
 import com.proyecto.servicio_venta.domain.models.*;
 import com.proyecto.servicio_venta.domain.repositories.*;
 import jakarta.transaction.Transactional;
@@ -44,13 +47,13 @@ public class VentaService {
         BigDecimal totalVenta = BigDecimal.ZERO;
 
         for (DetalleVentaRequest requestActual : request.detalleVenta()) {
-            Producto producto = productoRepository.findById(requestActual.productoId()).orElseThrow();
+            Producto producto = productoRepository.findById(requestActual.productoId()).orElseThrow(() -> new IdNotFoudException("Producto"));
 
             Integer cantidadRequerida = requestActual.cantidad();
             BigDecimal precioVenta = (requestActual.precioUnitario()==null)?producto.getPrecioVenta():requestActual.precioUnitario();
             totalVenta = totalVenta.add(precioVenta.multiply(BigDecimal.valueOf(cantidadRequerida)));
 
-            validarPrecio(producto.getCostoCompra(), precioVenta);
+            producto.validarPrecio(precioVenta);
 
             DetalleVenta detalleVenta = detalleVentaRepository.save(DetalleVenta.builder()
                     .productoId(producto.getId())
@@ -102,7 +105,7 @@ public class VentaService {
             }
 
             if(cantidadRequerida > 0){
-                throw new RuntimeException("Cantidad en stock insuficiente para el producto " + producto.getId());
+                throw new CantidadInsuficienteException(producto.getNombre());
             }
 
 //            ProductoCantidadRequest requestCantidad = new ProductoCantidadRequest(producto.getCantidadStock() - requestActual.cantidad());
@@ -116,16 +119,6 @@ public class VentaService {
         log.info("fin");
 
         return Venta.aResponse(venta, detallesDeVenta);
-    }
-
-    private void validarPrecio(BigDecimal costoCompra, BigDecimal precioVenta) {
-
-        BigDecimal precioMinimo = costoCompra.multiply(BigDecimal.valueOf(0.75));
-        BigDecimal precioMaximo = costoCompra.multiply(BigDecimal.valueOf(1.75));
-
-        if (precioVenta.compareTo(precioMinimo) < 0 || precioVenta.compareTo(precioMaximo) > 0) {
-            throw new RuntimeException("Precio de venta no valido");
-        }
     }
 
 }

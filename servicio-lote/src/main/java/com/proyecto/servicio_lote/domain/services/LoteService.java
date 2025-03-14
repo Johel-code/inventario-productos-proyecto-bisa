@@ -7,6 +7,7 @@ import com.proyecto.servicio_lote.app.rest.request.ProductoCostoCompraRequest;
 import com.proyecto.servicio_lote.app.rest.response.LoteResponse;
 import com.proyecto.servicio_lote.clients.ProductoFeignClient;
 import com.proyecto.servicio_lote.common.enums.TipoMovimiento;
+import com.proyecto.servicio_lote.common.exceptions.IdNotFoudException;
 import com.proyecto.servicio_lote.domain.models.Kardex;
 import com.proyecto.servicio_lote.domain.models.Lote;
 import com.proyecto.servicio_lote.domain.models.Producto;
@@ -36,8 +37,8 @@ public class LoteService {
     private final KardexRepository kardexRepository;
 
     public LoteResponse registrarLote(LoteRequest request){
-        var proveedor = proveedorRepository.findById(request.proveedorId()).orElseThrow(() -> new RuntimeException("No existe el proveedor"));
-        var producto = productoRepository.findById(request.productoId()).orElseThrow(() -> new RuntimeException("No existe el producto"));
+        var proveedor = proveedorRepository.findById(request.proveedorId()).orElseThrow(() -> new IdNotFoudException("Proveedor"));
+        var producto = productoRepository.findById(request.productoId()).orElseThrow(() -> new IdNotFoudException("Producto"));
 
 
         Lote lote = loteRepository.save(Lote.builder()
@@ -58,7 +59,7 @@ public class LoteService {
     }
 
     public List<LoteResponse> obtenerLotesPorIdProducto(Long productoId){
-        var producto = productoRepository.findById(productoId).orElseThrow(() -> new RuntimeException("No existe el producto"));
+        var producto = productoRepository.findById(productoId).orElseThrow(() -> new IdNotFoudException("Producto"));
         var lotes = loteRepository.encontrarLotesPorIdProductoOrdenadosPorExpiracion(productoId);
         log.info("lotes: " + lotes);
         return lotes.stream()
@@ -67,7 +68,7 @@ public class LoteService {
     }
 
     public void actualizarStockLote(Long id, LoteCantidadRequest request){
-        var lote = loteRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe el lote"));
+        var lote = loteRepository.findById(id).orElseThrow(() -> new IdNotFoudException("Lote"));
         lote.setCantidad(request.cantidad());
         loteRepository.save(lote);
     }

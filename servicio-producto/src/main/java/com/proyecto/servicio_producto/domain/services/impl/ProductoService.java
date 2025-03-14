@@ -2,6 +2,8 @@ package com.proyecto.servicio_producto.domain.services.impl;
 
 import com.proyecto.servicio_producto.app.rest.request.ProductoRequest;
 import com.proyecto.servicio_producto.app.rest.response.ProductoResponse;
+import com.proyecto.servicio_producto.commons.exceptions.CodigoProductoExisteExcepcion;
+import com.proyecto.servicio_producto.commons.exceptions.IdNotFoudException;
 import com.proyecto.servicio_producto.commons.utils.GeneradorCodigoProducto;
 import com.proyecto.servicio_producto.domain.models.Lote;
 import com.proyecto.servicio_producto.domain.models.Producto;
@@ -37,16 +39,16 @@ public class ProductoService implements IProductoService {
 
     @Override
     public ProductoResponse mostrarPorId(Long id) {
-        var producto = productoRepository.findById(id).orElseThrow();
+        var producto = productoRepository.findById(id).orElseThrow(() -> new IdNotFoudException("Producto"));
         return Producto.aResponse(producto);
     }
 
     @Override
     public ProductoResponse crear(ProductoRequest request) {
-        var categoria = categoriaRepository.findById(request.categoriaId()).orElseThrow();
+        var categoria = categoriaRepository.findById(request.categoriaId()).orElseThrow(() -> new IdNotFoudException("Categoria"));
 
         String codigo = GeneradorCodigoProducto.generateCodigo(request.nombre());
-        if(productoRepository.existsByCodigoProducto(codigo)) throw new RuntimeException("El producto ya existe en la base de datos");
+        if(productoRepository.existsByCodigoProducto(codigo)) throw new CodigoProductoExisteExcepcion();
 
         var producto = Producto.builder()
                 .codigoProducto(codigo)
@@ -63,11 +65,11 @@ public class ProductoService implements IProductoService {
 
     @Override
     public ProductoResponse actualizar(ProductoRequest request, Long id) {
-        var producto = productoRepository.findById(id).orElseThrow();
+        var producto = productoRepository.findById(id).orElseThrow(() -> new IdNotFoudException("Producto"));
         if(request.nombre()!=null) {
             producto.setNombre(request.nombre());
             String codigo = GeneradorCodigoProducto.generateCodigo(request.nombre());
-            if(productoRepository.existsByCodigoProducto(codigo)) throw new RuntimeException("El producto ya existe en la base de datos");   producto.setNombre(request.nombre());
+            if(productoRepository.existsByCodigoProducto(codigo)) throw new CodigoProductoExisteExcepcion();
             producto.setCodigoProducto(codigo);
         }
         producto.setCostoCompra(request.costoCompra());
@@ -76,7 +78,7 @@ public class ProductoService implements IProductoService {
                 request.porcentajeGanancia() != null ? request.porcentajeGanancia() : producto.getPorcentajeGanancia()));
         producto.setMinStock(request.minStock());
         if(request.categoriaId()!=null) {
-            producto.setCategoria(categoriaRepository.findById(request.categoriaId()).orElseThrow());
+            producto.setCategoria(categoriaRepository.findById(request.categoriaId()).orElseThrow(() -> new IdNotFoudException("Categoria")));
         }
         var saved = productoRepository.save(producto);
         return Producto.aResponse(saved);
@@ -84,7 +86,7 @@ public class ProductoService implements IProductoService {
 
     @Override
     public void eliminar(Long aLong) {
-        var producto = productoRepository.findById(aLong).orElseThrow();
+        var producto = productoRepository.findById(aLong).orElseThrow(() -> new IdNotFoudException("Producto"));
         productoRepository.delete(producto);
     }
 
@@ -96,7 +98,7 @@ public class ProductoService implements IProductoService {
 //    }
 
     public void actualizarCostoCompra(Long id) {
-        var producto = productoRepository.findById(id).orElseThrow();
+        var producto = productoRepository.findById(id).orElseThrow(() -> new IdNotFoudException("Producto"));
         var lotes = producto.getLotes();
 
         BigDecimal sumaCostosPonderados = BigDecimal.ZERO;
