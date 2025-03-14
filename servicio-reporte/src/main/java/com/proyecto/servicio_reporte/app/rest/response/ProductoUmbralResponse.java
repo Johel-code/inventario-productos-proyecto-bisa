@@ -6,10 +6,6 @@ public record ProductoUmbralResponse(
         Long id,
         String codigoProducto,
         String nombre,
-        BigDecimal costoCompra,
-        BigDecimal precioVenta,
-        Integer cantidadStock,
-        Integer minStock,
-        Long categoriaId
+        Integer cantidadStock
 ) {
 }

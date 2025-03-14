@@ -1,6 +1,5 @@
 package com.proyecto.servicio_producto.domain.services.impl;
 
-import com.proyecto.servicio_producto.app.rest.request.ProductoCantidadRequest;
 import com.proyecto.servicio_producto.app.rest.request.ProductoRequest;
 import com.proyecto.servicio_producto.app.rest.response.ProductoResponse;
 import com.proyecto.servicio_producto.commons.utils.GeneradorCodigoProducto;
@@ -10,6 +9,7 @@ import com.proyecto.servicio_producto.domain.repositories.CategoriaRepository;
 import com.proyecto.servicio_producto.domain.repositories.ProductoRepository;
 import com.proyecto.servicio_producto.domain.services.abstract_service.IProductoService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +20,7 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 @Transactional
+@Slf4j
 public class ProductoService implements IProductoService {
 
     private final ProductoRepository productoRepository;
@@ -51,8 +52,7 @@ public class ProductoService implements IProductoService {
                 .codigoProducto(codigo)
                 .nombre(request.nombre())
                 .costoCompra(request.costoCompra())
-                .precioVenta(calcularPrecioVenta(request.costoCompra(), request.porcentajeGanancia()))
-                .cantidadStock(0)
+                .precioVenta(Producto.calcularPrecioVenta(request.costoCompra(), request.porcentajeGanancia()))
                 .minStock(request.minStock())
                 .porcentajeGanancia(request.porcentajeGanancia())
                 .categoria(categoria)
@@ -72,7 +72,7 @@ public class ProductoService implements IProductoService {
         }
         producto.setCostoCompra(request.costoCompra());
         producto.setPorcentajeGanancia(request.porcentajeGanancia());
-        producto.setPrecioVenta(calcularPrecioVenta(request.costoCompra(),
+        producto.setPrecioVenta(Producto.calcularPrecioVenta(request.costoCompra(),
                 request.porcentajeGanancia() != null ? request.porcentajeGanancia() : producto.getPorcentajeGanancia()));
         producto.setMinStock(request.minStock());
         if(request.categoriaId()!=null) {
@@ -82,21 +82,18 @@ public class ProductoService implements IProductoService {
         return Producto.aResponse(saved);
     }
 
-    private BigDecimal calcularPrecioVenta(BigDecimal costoCompra, Double porcentajeGanancia) {
-        return costoCompra.add(costoCompra.multiply(BigDecimal.valueOf(porcentajeGanancia + IMPUESTO_IVA + IMPUESTO_IT)));
-    }
-
     @Override
     public void eliminar(Long aLong) {
         var producto = productoRepository.findById(aLong).orElseThrow();
         productoRepository.delete(producto);
     }
 
-    public void actualizarStock(Long id, ProductoCantidadRequest request) {
-        var producto = productoRepository.findById(id).orElseThrow();
-        producto.setCantidadStock(request.cantidadStock());
-        productoRepository.save(producto);
-    }
+//    public void actualizarStock(Long id, ProductoCantidadRequest request) {
+//        var producto = productoRepository.findById(id).orElseThrow();
+//        producto.setCantidadStock(request.cantidadStock());
+//        log.info("En servicio producto, stock actualizada: " + producto.getCantidadStock());
+//        productoRepository.save(producto);
+//    }
 
     public void actualizarCostoCompra(Long id) {
         var producto = productoRepository.findById(id).orElseThrow();
@@ -116,10 +113,10 @@ public class ProductoService implements IProductoService {
                 sumaCostosPonderados.divide(BigDecimal.valueOf(sumaCantidades), 2, RoundingMode.HALF_UP);
 
         producto.setCostoCompra(nuevoCostoCompra);
-        producto.setPrecioVenta(calcularPrecioVenta(nuevoCostoCompra, producto.getPorcentajeGanancia()));
+        log.info("En servicio producto, costo de compra actualizado: " + nuevoCostoCompra);
+        producto.setPrecioVenta(Producto.calcularPrecioVenta(nuevoCostoCompra, producto.getPorcentajeGanancia()));
+        log.info("En servicio producto, precio de venta actualizado: " + producto.getPrecioVenta());
         productoRepository.save(producto);
     }
 
-    private final static Double IMPUESTO_IVA = 0.13;
-    private final static Double IMPUESTO_IT  = 0.03;
 }

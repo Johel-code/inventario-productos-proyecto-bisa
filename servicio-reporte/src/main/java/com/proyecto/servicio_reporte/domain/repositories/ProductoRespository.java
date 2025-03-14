@@ -17,6 +17,11 @@ public interface ProductoRespository extends JpaRepository<Producto, Long> {
             "GROUP BY p.id, p.codigoProducto, p.nombre, p.categoriaId, d.cantidad ")
     Page<ProductoMasVendidoResponse> obtenerProductosOrdenadosPorCantidadVendida(Pageable pageable);
 
+    @Query("select new com.proyecto.servicio_reporte.app.rest.response.ProductoUmbralResponse(" +
+            "p.id, p.codigoProducto, p.nombre, cast(sum(l.cantidad) as INTEGER) )  " +
+            "from Producto p join p.lotes l " +
+            "group by p.id, p.codigoProducto, p.nombre " +
+            "having sum(l.cantidad) < :umbral")
     List<ProductoUmbralResponse> findByCantidadStockLessThan(Integer umbral);
 
 }

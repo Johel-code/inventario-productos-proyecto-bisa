@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Entity
@@ -25,7 +26,6 @@ public class Producto {
   private String nombre;
   private BigDecimal costoCompra;
   private BigDecimal precioVenta;
-  private Integer cantidadStock;
   private Integer minStock;
   private Double porcentajeGanancia;
 
@@ -36,18 +36,34 @@ public class Producto {
   @OneToMany(mappedBy = "producto")
   private List<Lote> lotes;
 
+  public int getCantidadStock() {
+    int cantidadStock = 0;
+    for (Lote lote : lotes) {
+      cantidadStock += lote.getCantidad();
+    }
+    return cantidadStock;
+  }
+
+  public static BigDecimal calcularPrecioVenta(BigDecimal costoCompra, Double porcentajeGanancia) {
+    return costoCompra.add(costoCompra.multiply(BigDecimal.valueOf(porcentajeGanancia + IMPUESTO_IVA + IMPUESTO_IT)).setScale(2, RoundingMode.HALF_UP));
+  }
+
   public static ProductoResponse aResponse(Producto producto) {
+    Integer cantidad = producto.lotes == null ? 0 : producto.getCantidadStock();
     return new ProductoResponse(
         producto.id,
         producto.codigoProducto,
         producto.nombre,
         producto.costoCompra,
         producto.precioVenta,
-        producto.cantidadStock,
+        cantidad,
         producto.minStock,
         producto.porcentajeGanancia,
         producto.getCategoria().getId()
     );
   }
+
+  private final static Double IMPUESTO_IVA = 0.13;
+  private final static Double IMPUESTO_IT  = 0.03;
 
 }
