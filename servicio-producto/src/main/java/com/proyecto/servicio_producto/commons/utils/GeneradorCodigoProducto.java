@@ -38,6 +38,9 @@ public class GeneradorCodigoProducto {
         String[] palabras = nombreProducto.split(" ");
         if(palabras.length == 1) {
             prefijo = new StringBuilder(palabras[0].substring(0, Math.min(palabras[0].length(), 3)));
+            while(prefijo.length() < 3) {
+                prefijo.append("X");
+            }
         }else{
             for (int i = 0; i < palabras.length && i < 3; i++) {
                 prefijo.append(palabras[i].charAt(0));
