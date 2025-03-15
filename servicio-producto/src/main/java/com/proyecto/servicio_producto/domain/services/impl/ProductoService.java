@@ -48,7 +48,8 @@ public class ProductoService implements IProductoService {
         var categoria = categoriaRepository.findById(request.categoriaId()).orElseThrow(() -> new IdNotFoudException("Categoria"));
 
         String codigo = GeneradorCodigoProducto.generateCodigo(request.nombre());
-        if(productoRepository.existsByCodigoProducto(codigo)) throw new CodigoProductoExisteExcepcion();
+        if(productoRepository.existsByCodigoProducto(codigo))
+            throw new CodigoProductoExisteExcepcion();
 
         var producto = Producto.builder()
                 .codigoProducto(codigo)
