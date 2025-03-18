@@ -1,10 +1,11 @@
 package com.proyecto.servicio_venta.common.exceptions;
 
-public class PrecioNoValidoException extends RuntimeException {
+import com.proyecto.servicio_venta.common.enums.ErrorMsg;
 
-    private static final String ERROR_MESSAGE = "Precio de venta no valido para el producto: %s";
+public class PrecioNoValidoException extends BaseException{
+
 
     public PrecioNoValidoException(String producto) {
-        super(String.format(ERROR_MESSAGE, producto));
+        super(ErrorMsg.PRECIO_NO_VALIDO, producto);
     }
 }

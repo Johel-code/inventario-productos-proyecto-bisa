@@ -1,10 +1,11 @@
 package com.proyecto.servicio_producto.commons.exceptions;
 
-public class CodigoProductoExisteExcepcion extends RuntimeException {
+import com.proyecto.servicio_producto.commons.enums.ErrorMsg;
 
-    private static final String ERROR_MESSAGE = "El producto ya existe en la base de datos";
+public class CodigoProductoExisteExcepcion extends BaseException{
+
 
     public CodigoProductoExisteExcepcion() {
-        super(ERROR_MESSAGE);
+        super(ErrorMsg.CODIGO_PRODUCTO_EXISTENTE, "");
     }
 }

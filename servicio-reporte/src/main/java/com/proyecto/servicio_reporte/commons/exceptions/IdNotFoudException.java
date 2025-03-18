@@ -1,7 +1,7 @@
-package com.proyecto.servicio_lote.common.exceptions;
+package com.proyecto.servicio_reporte.commons.exceptions;
 
 
-import com.proyecto.servicio_lote.common.enums.ErrorMsg;
+import com.proyecto.servicio_reporte.commons.enums.ErrorMsg;
 
 public class IdNotFoudException extends BaseException{
 
