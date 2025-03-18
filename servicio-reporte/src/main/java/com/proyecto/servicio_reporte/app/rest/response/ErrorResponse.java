@@ -1,4 +1,4 @@
-package com.proyecto.servicio_producto.app.rest.response;
+package com.proyecto.servicio_reporte.app.rest.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.http.HttpStatus;

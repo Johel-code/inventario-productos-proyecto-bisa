@@ -1,10 +1,11 @@
 package com.proyecto.servicio_venta.common.exceptions;
 
-public class IdNotFoudException extends RuntimeException {
+import com.proyecto.servicio_venta.common.enums.ErrorMsg;
 
-    private static final String ERROR_MESSAGE = "El id no existe en %s";
+public class IdNotFoudException extends BaseException{
+
 
     public IdNotFoudException(String tableName) {
-        super(String.format(ERROR_MESSAGE, tableName));
+        super(ErrorMsg.ID_NOT_FOUND, tableName);
     }
 }

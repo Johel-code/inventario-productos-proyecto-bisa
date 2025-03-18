@@ -1,17 +1,12 @@
 package com.proyecto.servicio_venta.app.rest.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.http.HttpStatus;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ErrorResponse extends BaseErrorResponse{
-
-    private String message;
+public record ErrorResponse(
+        String codigo,
+        String mensaje,
+        @JsonIgnore
+        HttpStatus status
+) {
 }
