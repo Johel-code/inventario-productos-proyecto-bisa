@@ -5,6 +5,7 @@ import com.proyecto.servicio_venta.app.rest.response.VentaResponse;
 import com.proyecto.servicio_venta.domain.services.VentaService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,6 @@ public class VentaController {
 
     @PostMapping
     public ResponseEntity<VentaResponse> realizarVenta(@Valid @RequestBody VentaRequest ventaRequest) {
-        return ResponseEntity.ok(ventaService.registrarVenta(ventaRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ventaService.registrarVenta(ventaRequest));
     }
 }
