@@ -7,6 +7,7 @@ import com.proyecto.servicio_lote.domain.services.LoteService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,7 @@ public class LoteController {
 
     @PostMapping
     public ResponseEntity<LoteResponse> registrarLote(@Valid @RequestBody LoteRequest request){
-        return ResponseEntity.ok(loteService.registrarLote(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(loteService.registrarLote(request));
     }
 
     @GetMapping(path = "producto-vencimiento/{id}")
