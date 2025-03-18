@@ -4,9 +4,11 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Builder;
 
 import java.math.BigDecimal;
 
+@Builder
 public record DetalleVentaRequest(
 
         @NotNull(message = "El ID del producto no puede ser nulo")
