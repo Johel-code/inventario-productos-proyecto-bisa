@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   db:
@@ -9,8 +7,86 @@ services:
     volumes:
       - ./db/sql:/docker-entrypoint-initdb.d
     environment:
-      - POSTGRES_DB=proyecto_bisa
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
       - "5432:5432"
+    networks:
+      - app-network
+
+  servicio-producto:
+    image: johel16/productos
+#    build:
+#      context: ./servicio-producto
+    container_name: servicio-producto
+    ports:
+      - "8081:8081"
+    restart: always
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SERVER_PORT=8081
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  servicio-venta:
+    image: johel16/ventas
+#    build:
+#      context: ./servicio-venta
+    container_name: servicio-venta
+    ports:
+      - "8082:8082"
+    restart: always
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SERVER_PORT=8082
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  servicio-lote:
+    image: johel16/lotes
+#    build:
+#      context: ./servicio-lote
+    container_name: servicio-lote
+    ports:
+      - "8083:8083"
+    restart: always
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SERVER_PORT=8083
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  servicio-reporte:
+    image: johel16/reportes
+#    build:
+#      context: ./servicio-reporte
+    container_name: servicio-reporte
+    ports:
+      - "8084:8084"
+    restart: always
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SERVER_PORT=8084
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
