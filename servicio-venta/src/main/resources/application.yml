@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: ${SERVER_PORT:8082}
 spring:
   application:
     name: servicio-venta
@@ -8,6 +8,6 @@ spring:
       connection-timeout: 5000
       maximum-pool-size: 2
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/proyecto_bisa
-    username: postgres
-    password: 1234
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
